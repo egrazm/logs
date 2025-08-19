@@ -8,8 +8,9 @@ SERVER_URL = "http://127.0.0.1:5000/logs"
 TOKEN = "abc123"
 
 
-SERVICIOS = ["servicio_a", "servicio_b"]
+SERVICIOS = ["Proveedores", "Venta", "Pago"]
 SEVERITIES = ["INFO", "DEBUG", "WARNING", "ERROR"]
+
 
 
 def generar_log():
