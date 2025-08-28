@@ -8,14 +8,14 @@ SERVER_URL = "http://127.0.0.1:5000/logs"
 TOKEN = "abc123"
 
 
-SERVICIOS = ["Proveedores", "Venta", "Pago"]
+SERVICIOS = ["pagos", "notificaciones", "reportes"]
 SEVERITIES = ["INFO", "DEBUG", "WARNING", "ERROR"]
 
 
 
 def generar_log():
     return {
-        "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+        "timestamp": datetime.datetime.utcnow().isoformat() + "Z", #zulu time
         "service": random.choice(SERVICIOS),
         "severity": random.choice(SEVERITIES),
         "message": f"Evento simulado {random.randint(1, 100)}"

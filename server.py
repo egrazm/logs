@@ -9,8 +9,9 @@ DB_PATH = "logs.db"
 
 # Tokens válidos (uno por servicio)
 TOKENS_VALIDOS = {
-    "servicio_a": "abc123",
-    "servicio_b": "xyz789",
+    "pagos": "abc123",
+    "notificaciones": "xyz789",
+    "reportes": "def456"
 
 }
 
@@ -27,6 +28,7 @@ def init_db():
             message TEXT NOT NULL,
             received_at TEXT NOT NULL
         )""")
+
         conn.commit()
 
 def insert_logs(logs):
@@ -55,7 +57,7 @@ def validar_log_dict(d: dict) -> tuple[bool, str]:
     return True, ""
 
 # ---------- endpoints ----------
-@app.route("/ping", methods=["GET"])
+@app.route("/ping", methods=["GET"]) 
 def ping():
     return jsonify({"status": "ok"})
 
@@ -66,19 +68,19 @@ def recibir_logs():
         return jsonify({"error": "Quién sos, bro?"}), 401
 
     # 2) Parseo JSON
-    data = request.get_json(silent=True)
+    data = request.get_json(silent=True)  # que es e lsilent true
     if data is None:
         return jsonify({"error": "JSON inválido o faltante"}), 400
 
     # Normalizar a lista
-    if isinstance(data, dict):
+    if isinstance(data, dict):  #inverstigar
         data = [data]
     elif not isinstance(data, list):
-        return jsonify({"error": "El cuerpo debe ser un objeto o una lista de objetos"}), 400
+        return jsonify({"error": "El cuerpo debe ser un objeto o una lista de objetos"}), 400 
 
     # 3) Validación de cada log
     logs_validados = []
-    for idx, log in enumerate(data, start=1):
+    for idx, log in enumerate(data, start=1): #investigar
         if not isinstance(log, dict):
             return jsonify({"error": f"Elemento #{idx} no es un objeto JSON"}), 400
         ok, msg = validar_log_dict(log)
@@ -95,29 +97,18 @@ def recibir_logs():
     # 5) Respuesta
     return jsonify({"status": "ok", "count": len(logs_validados)}), 200
 
+
 @app.route("/logs", methods=["GET"])
 def consultar_logs():
     params = request.args
-    ts_start = params.get("timestamp_start")
-    ts_end = params.get("timestamp_end")
-    ra_start = params.get("received_at_start")
-    ra_end = params.get("received_at_end")
+    service = params.get("service")  # 👈 parámetro para filtrar por servicio
 
     query = "SELECT id, timestamp, service, severity, message, received_at FROM logs WHERE 1=1"
     values = []
 
-    if ts_start:
-        query += " AND timestamp >= ?"
-        values.append(ts_start)
-    if ts_end:
-        query += " AND timestamp <= ?"
-        values.append(ts_end)
-    if ra_start:
-        query += " AND received_at >= ?"
-        values.append(ra_start)
-    if ra_end:
-        query += " AND received_at <= ?"
-        values.append(ra_end)
+    if service:
+        query += " AND service = ?".lower()   # 👈 filtro por servicio
+        values.append(service)
 
     query += " ORDER BY id ASC"
 
@@ -138,6 +129,7 @@ def consultar_logs():
         })
 
     return jsonify({"count": len(logs), "logs": logs})
+
 
 
 if __name__ == "__main__":
